@@ -1,7 +1,5 @@
 # 🚀 StarGarden Astro Theme
 
-![StarGarden Theme](./src/assets/landing-hero.png)
-
 ## 🌐 Live Demo
 
 Experience StarGarden in action at [stargarden.pages.dev](https://stargarden.pages.dev/).
