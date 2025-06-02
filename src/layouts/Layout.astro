@@ -28,6 +28,8 @@ const seoConfig = {
   title: seo.title ?? title,
   description: seo.description ?? description,
 };
+
+
 ---
 
 <!doctype html>
@@ -57,17 +59,29 @@ const seoConfig = {
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="generator" content={Astro.generator} />
+  
+  
+      <!-- ✅ ADD Leaflet CSS here -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      crossorigin=""
+    />
+  
+  
+  
+  
   </head>
 
   <body
     class="bg-base-100 text-base-content min-h-screen flex flex-col overflow-x-hidden"
   >
-    <Navbar />
+
 
     <!-- Main page content -->
-    <main class="flex-1 container mx-auto px-4 py-8">
+
       <slot />
-    </main>
+
 
     <Footer />
   </body>

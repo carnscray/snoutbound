@@ -1,0 +1,62 @@
+---
+import SearchHead from '../components/SearchHead.astro';
+import LatestPosts from '../components/LatestPosts.astro';
+import Layout from '../layouts/Layout.astro';
+
+import client from '../lib/contentful';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import SearchResultsCards from '../components/SearchResultsCards.astro';
+import SearchResultsMap from '../components/SearchResultsMap.astro';
+
+const response = await client.getEntries({
+  content_type: 'dogLocation',
+  'fields.dogLocationType': 'Park',
+  
+});
+
+const parks = response.items.map((item) => {
+  const hero = item.fields.dogLocationHero;
+
+  const imageUrl = hero?.fields?.file?.url
+    ? `https:${hero.fields.file.url}`
+    : null;
+
+  const imageAlt = hero?.fields?.title || item.fields.dogLocationName;
+
+  return {
+    id: item.sys.id,
+    name: item.fields.dogLocationName,
+    type: item.fields.dogLocationType,
+    address: item.fields.dogLocationAddress,
+    introHtml: item.fields.dogLocationIntro
+      ? documentToHtmlString(item.fields.dogLocationIntro)
+      : '',
+    imageUrl,
+    imageAlt,
+    coordinates: item.fields.dogLocationCoord
+      ? [
+          item.fields.dogLocationCoord.lat,
+          item.fields.dogLocationCoord.lon,
+        ]
+      : null,
+    isFenced: item.fields.dogLocationIsFenced,
+  };
+});
+---
+
+<Layout>
+  <SearchHead />
+
+<div class="w-full">
+
+  <div class="flex flex-col lg:flex-row gap-6">
+    <div class="w-full lg:w-1/2 ">
+      <SearchResultsCards parks={parks} />
+    </div>
+    <div class="w-full lg:w-1/2 min-h-[1000px] lg:min-h-[1200px]">
+      <SearchResultsMap parks={parks} />
+    </div>
+  </div>
+</div>
+
+</Layout>

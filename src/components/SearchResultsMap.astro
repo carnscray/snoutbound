@@ -1,0 +1,60 @@
+---
+export interface Props {
+  parks: {
+    name: string;
+    type: string;
+    coordinates: [number, number] | null;
+  }[];
+}
+const { parks } = Astro.props;
+---
+
+<div class="relative w-full min-h-[600px] lg:min-h-[1000px] bg-base-200 rounded">
+  <div id="dogMap" class="absolute inset-0 z-0 rounded" data-parks={JSON.stringify(parks)}></div>
+
+
+
+<script type="module">
+  import * as L from 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js';
+
+  const mapContainer = document.getElementById('dogMap');
+  if (!mapContainer) {
+    console.error('❌ Map container not found');
+  } else {
+    // Parse parks data from data attribute
+    const parks = JSON.parse(mapContainer.dataset.parks);
+
+    // Initialize the map
+    const map = L.map(mapContainer);
+
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add markers
+    const coordinates = [];
+    parks.forEach((park) => {
+      if (park.coordinates) {
+        L.marker(park.coordinates).addTo(map)
+          .bindPopup(`<strong>${park.name}</strong><br>${park.type}`);
+        coordinates.push(park.coordinates);
+      }
+    });
+
+    // Set view based on number of coordinates
+    if (coordinates.length === 1) {
+      map.setView(coordinates[0], 15);
+    } else if (coordinates.length > 1) {
+      const bounds = L.latLngBounds(coordinates);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    } else {
+      map.setView([-25.2744, 133.7751], 5); // fallback to Australia-wide view
+    }
+  }
+</script>
+
+
+
+
+</div>
