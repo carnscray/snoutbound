@@ -1,0 +1,83 @@
+---
+export interface Props {
+  locs: {
+    id: string;
+    name: string;
+    type: string;
+    town?: string;
+    introHtml?: string;
+    imageUrl?: string | null;
+    imageAlt?: string;
+    isOffLead?: boolean;
+    isEnclosed?: boolean;
+    hasWater?: boolean;
+  }[];
+}
+
+
+const { locs } = Astro.props;
+---
+
+<div class="w-full p-4">
+
+
+  {locs.length === 0 ? (
+    <div class="text-center text-gray-500 text-lg py-12">
+      No results match this criteria.
+    </div>
+  ) : (
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {locs.map((loc) => (
+        <article
+          class="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden flex flex-col"
+          key={locs.id}
+        >
+          {loc.imageUrl && (
+            <img
+              src={loc.imageUrl}
+              alt={loc.imageAlt || loc.name}
+              class="w-full aspect-square object-cover"
+              loading="lazy"
+            />
+          )}
+          <div class="p-4 flex-1 flex flex-col">
+
+            <h2 class="text-base font-semibold mb-1 truncate">{loc.name}</h2>
+            
+            <div class="flex items-center gap-2 mt-0">
+              {loc.town && (
+                <p class="text-xs text-gray-500 mb-0 uppercase">{loc.town}</p>
+              )}
+              <p class="text-xs text-gray-400 mb-0 uppercase">|</p>
+
+              <!-- isOffLead → unlink icon -->
+              <iconify-icon
+                icon="lucide:unlink"
+                width="16"
+                height="16"
+                class={loc.isOffLead ? 'text-blue-600' : 'text-gray-400'}
+              ></iconify-icon>
+
+              <!-- isEnclosed → fence icon -->
+              <iconify-icon
+                icon="lucide:fence"
+                width="16"
+                height="16"
+                class={loc.isEnclosed ? 'text-blue-600' : 'text-gray-400'}
+              ></iconify-icon>
+
+              <!-- hasWater → droplet icon -->
+              <iconify-icon
+                icon="lucide:droplet"
+                width="16"
+                height="16"
+                class={loc.hasWater ? 'text-blue-600' : 'text-gray-400'}
+              ></iconify-icon>
+            </div>
+              
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</div>

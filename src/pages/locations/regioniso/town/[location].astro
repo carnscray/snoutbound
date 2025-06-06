@@ -1,0 +1,91 @@
+---
+const { regioniso, town, location } = Astro.params;
+
+import client from '../../../../../lib/contentful';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+
+// Helper to normalize slugs
+const slugify = (str) =>
+  str?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+
+// 1️⃣ This tells Astro which routes to build statically
+export async function getStaticPaths() {
+  const response = await client.getEntries({
+    content_type: 'dogLocation',
+  });
+
+  return response.items.map((item) => ({
+    params: {
+      regioniso: slugify(item.fields.locationRegionIsoSlug),
+      town: slugify(item.fields.locationTownSlug),
+      location: slugify(item.fields.locationNameSlug),
+    }
+  }));
+}
+
+// 2️⃣ This is the logic to handle the specific route
+const response = await client.getEntries({
+  content_type: 'dogLocation',
+});
+
+const loc = response.items.find((item) => {
+  const fields = item.fields;
+  return (
+    slugify(fields.locationNameSlug) === location &&
+    slugify(fields.locationTownSlug) === town &&
+    slugify(fields.locationRegionIsoSlug) === regioniso
+  );
+});
+
+if (!loc) {
+  throw new Error(`Location not found: ${regioniso}/${town}/${location}`);
+}
+
+const {
+  locationName,
+  locationIntro,
+  locationHero,
+  locationTown,
+  locationRegion,
+  locationIsEnclosed,
+  locationIsOffLead,
+  locationHasWater,
+} = loc.fields;
+
+const imageUrl = locationHero?.fields?.file?.url
+  ? `https:${locationHero.fields.file.url}`
+  : null;
+
+const introHtml = locationIntro
+  ? documentToHtmlString(locationIntro)
+  : '';
+---
+
+<html lang="en">
+  <head>
+    <title>{locationName}</title>
+    <meta name="description" content={`Details for ${locationName} in ${locationTown}, ${locationRegion}`} />
+  </head>
+  <body class="p-6 font-sans">
+    <h1 class="text-3xl font-bold mb-2">{locationName}</h1>
+    <p class="text-gray-600 mb-4 uppercase text-sm tracking-wide">
+      {locationTown}, {locationRegion}
+    </p>
+
+    {imageUrl && (
+      <img
+        src={imageUrl}
+        alt={locationName}
+        class="mb-4 w-full max-w-2xl rounded shadow-md"
+      />
+    )}
+
+    <div class="prose max-w-none mb-6" set:html={introHtml} />
+
+    <ul class="text-sm space-y-2">
+      <li>✅ Enclosed: <strong>{locationIsEnclosed ? 'Yes' : 'No'}</strong></li>
+      <li>🐾 Off-Leash: <strong>{locationIsOffLead ? 'Yes' : 'No'}</strong></li>
+      <li>🚰 Water Available: <strong>{locationHasWater ? 'Yes' : 'No'}</strong></li>
+    </ul>
+  </body>
+</html>

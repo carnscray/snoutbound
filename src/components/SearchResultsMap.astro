@@ -1,0 +1,93 @@
+---
+export interface Props {
+  locs: {
+    name: string;
+    type: string;
+    coordinates: [number, number] | null;
+  }[];
+}
+const { locs } = Astro.props;
+---
+
+<div class="relative w-full min-h-[550px] lg:min-h-[900px] bg-base-200 rounded">
+  <div id="dogMap" class="absolute inset-0 z-0 rounded" data-locs={JSON.stringify(locs)}></div>
+
+  <script type="module">
+    import * as L from 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js';
+
+    const mapContainer = document.getElementById('dogMap');
+    if (!mapContainer) {
+      console.error('❌ Map container not found');
+    } else {
+      const locs = JSON.parse(mapContainer.dataset.locs);
+      const map = L.map(mapContainer);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      const coordinates = [];
+
+      locs.forEach((loc) => {
+        if (loc.coordinates) {
+
+    const popupContent = `
+    <div style="font-family: sans-serif; font-size: 14px;">
+      <h2 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600;">${loc.name}</h2>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        ${loc.town ? `<span style="text-transform: uppercase; color: #6b7280; font-size: 12px;">${loc.town}</span>` : ''}
+        <span style="color: #9ca3af;">|</span>
+        
+        <span style="color: ${loc.isOffLead ? '#2563eb' : '#9ca3af'};">
+              <iconify-icon
+                icon="lucide:unlink"
+                width="16"
+                height="16"
+                class={loc.isOffLead ? 'text-blue-600' : 'text-gray-400'}
+              ></iconify-icon>
+        </span>
+        
+        <span style="color: ${loc.isEnclosed ? '#2563eb' : '#9ca3af'};">
+              <iconify-icon
+                icon="lucide:fence"
+                width="16"
+                height="16"
+                class={loc.isEnclosed ? 'text-blue-600' : 'text-gray-400'}
+              ></iconify-icon>
+        </span>
+        
+        <span style="color: ${loc.hasWater ? '#2563eb' : '#9ca3af'};">
+              <iconify-icon
+                icon="lucide:droplet"
+                width="16"
+                height="16"
+                class={loc.hasWater ? 'text-blue-600' : 'text-gray-400'}
+              ></iconify-icon>
+        </span>
+      </div>
+    </div>  `;
+
+
+
+          L.marker(loc.coordinates)
+            .addTo(map)
+            .bindPopup(popupContent);
+          
+
+          coordinates.push(loc.coordinates);
+
+
+        }
+      });
+
+      if (coordinates.length === 1) {
+        map.setView(coordinates[0], 15);
+      } else if (coordinates.length > 1) {
+        const bounds = L.latLngBounds(coordinates);
+        map.fitBounds(bounds, { padding: [50, 50] });
+      } else {
+        map.setView([-25.2744, 133.7751], 5);
+      }
+    }
+  </script>
+</div>

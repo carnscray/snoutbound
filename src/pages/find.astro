@@ -1,0 +1,88 @@
+---
+export const prerender = false;
+
+import Banner from '../components/Banner.astro';
+import SearchHead from '../components/SearchHead.astro';
+import Layout from '../layouts/Layout.astro';
+
+import client from '../lib/contentful';
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer';
+import SearchResultsCards from '../components/SearchResultsCards.astro';
+import SearchResultsMap from '../components/SearchResultsMap.astro';
+
+// Get query params from URL
+const url = new URL(Astro.request.url);
+const initialQuery = url.searchParams.get('q') ?? '';
+const q = initialQuery.toLowerCase();
+
+const isEnclosed = url.searchParams.get('enclosed') === 'true';
+const isOffLead = url.searchParams.get('offlead') === 'true';
+const hasWater = url.searchParams.get('water') === 'true';
+
+// Fetch entries from Contentful
+const response = await client.getEntries({
+  content_type: 'dogLocation',
+  'fields.locationType': 'park',
+});
+
+// Map locations with safe defaults
+  const locs = response.items.map((item) => {
+  const hero = item.fields.locationHero;
+
+  const imageUrl = hero?.fields?.file?.url
+    ? `https:${hero.fields.file.url}`
+    : null;
+
+  const imageAlt = hero?.fields?.title || item.fields.locationName;
+
+  return {
+    id: item.sys.id,
+    name: item.fields.locationName,
+    type: item.fields.locationType,
+    town: item.fields.locationTown,
+    introHtml: item.fields.locationIntro
+      ? documentToHtmlString(item.fields.locationIntro)
+      : '',
+    imageUrl,
+    imageAlt,
+    coordinates: item.fields.locationCoord
+      ? [
+          item.fields.locationCoord.lat,
+          item.fields.locationCoord.lon,
+        ]
+      : null,
+    isEnclosed: !!item.fields.locationIsEnclosed,
+    isOffLead: !!item.fields.locationIsOffLead,
+    hasWater: !!item.fields.locationHasWater,
+  };
+});
+
+// Apply filters
+const filteredLocs = locs.filter((loc) =>
+  (q === '' || loc.town?.toLowerCase().includes(q)) &&
+  (!isEnclosed || loc.isEnclosed) &&
+  (!isOffLead || loc.isOffLead) &&
+  (!hasWater || loc.hasWater)
+);
+---
+
+<Layout>
+  <Banner />
+  <SearchHead
+    initialQuery={initialQuery}
+    isOffLead={isOffLead}
+    isEnclosed={isEnclosed}
+    hasWater={hasWater}
+  />
+
+  <div class="w-full">
+    <div class="flex flex-col-reverse lg:flex-row gap-0">
+      <div class="w-full lg:w-1/2 border border-gray-200">
+        <SearchResultsCards locs={filteredLocs} />
+      </div>
+      <div class="w-full lg:w-1/2 border border-gray-200 min-h-[800px] lg:min-h-[900px]">
+        <SearchResultsMap locs={filteredLocs} />
+      </div>
+    </div>
+  </div>
+</Layout>

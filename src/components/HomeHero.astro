@@ -1,0 +1,31 @@
+---
+import murphyImage from '../assets/murphy.png';
+import Search from "astro-pagefind/components/Search";
+import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+---
+
+<section
+  class="relative w-full h-[33vh] bg-cover bg-center flex items-center justify-center"
+  style={`background-image: url(${murphyImage.src});`}
+>
+  <div class="text-center">
+    <h1 class="text-white text-4xl md:text-6xl font-bold drop-shadow-lg">
+      snoutbound
+    </h1>
+    <h2 class="text-white text-xl md:text-2xl font-medium drop-shadow-md mt-2">
+      Find your dogs happy place
+    </h2>
+
+<div class="flex items-center justify-center w-full px-4 mt-6">
+  <Search
+    id="mobile-search"
+    className="pagefind-ui w-full max-w-xl"
+    uiOptions={{ showImages: false }}
+  />
+</div>
+
+
+    
+  </div>
+</section>
+

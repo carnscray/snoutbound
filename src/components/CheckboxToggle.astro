@@ -1,0 +1,26 @@
+a---
+const { name, label, checked = false } = Astro.props;
+---
+
+<label class="cursor-pointer">
+  <input
+    type="checkbox"
+    name={name}
+    value="true"
+    class="hidden-box peer"
+    checked={checked}
+  />
+  <div class="px-2 py-0 border rounded transition
+              peer-checked:bg-gray-700 peer-checked:text-white peer-checked:border-gray-700
+              text-black border-black bg-white">
+    {label}
+  </div>
+</label>
+
+<style>
+  input[type="checkbox"].hidden-box {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>

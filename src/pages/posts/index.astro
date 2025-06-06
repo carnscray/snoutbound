@@ -4,6 +4,9 @@ import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { Image } from "astro:assets";
 const posts = await getCollection("posts");
+
+import Banner from '../../components/Banner.astro';
+import SearchHead from '../../components/SearchHead.astro';
 ---
 
 <Layout
@@ -12,7 +15,9 @@ const posts = await getCollection("posts");
     description: "A collection of posts about stars and astronomy.",
   }}
 >
-  <section class="container mx-auto px-4 py-8">
+<Banner />
+
+  <section class="container mx-auto pt-20 px-4 py-8">
     <h2 class="text-3xl font-bold mb-6">Posts</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {
